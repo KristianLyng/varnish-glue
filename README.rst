@@ -56,3 +56,53 @@ This is a generic redirect-VCL. It is used by hitch.vcl, but can be used by
 others too. It allows you to issue HTTP 301/302 redirects from `vcl_recv`.
 
 
+QUICK START
+===========
+
+Configures varnish, hitch and acmetool on a Debian box:
+
+::
+
+   # Assumes you run a sensible distro, but should be easy to translate to
+   # lesser distros as well.
+
+   apt-get install varnish acmetool hitch
+   rm -fr /etc/varnish
+   git clone https://github.com/KristianLyng/varnish-glue /etc/varnish
+   cd /etc/varnish
+   for a in conf-available/{hitch,redirect,acmetool}.vcl; do
+      bin/varnish-conf-enable $a
+   done
+   cp sites-available/example.vcl sites-available/yoursite.vcl
+
+   # Set up your site/backend
+   vi sites-available/yoursite.vcl
+
+   bin/varnish-site-enable sites-available/yoursite.vcl
+   bin/varnish-update-includes
+
+   cp /etc/varnish/examples/hitch/hitch.conf /etc/hitch/hitch.conf
+
+   mkdir /etc/systemd/system/varnish.service.d/
+   cp /etc/varnish/examples/override.conf /etc/systemd/system/varnish.service.d
+
+   systemctl daemon-reload
+
+   systemctl stop varnish
+   systemctl enable varnish
+   systemctl enable varnish
+
+   # Set up your domains
+   vi /etc/hitch/hitch.conf
+
+   # Chose (ha)proxy
+   acmetool quickstart
+
+   # One for each domain in the hitch config - depends on acmetool.vcl and
+   # a running varnish
+   acmetool want www.example.com
+
+   systemctl restart hitch
+
+
+   
