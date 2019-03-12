@@ -1,0 +1,9 @@
+#!/bin/bash
+
+base=$(basename $1)
+target=$(readlink -f $1)
+link="/etc/varnish/sites-enabled/$base"
+if [ ! -e "$link" ]; then
+	ln -s ${target} ${link}
+fi
+

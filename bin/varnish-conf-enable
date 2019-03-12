@@ -1,0 +1,10 @@
+#!/bin/bash
+
+base=$(basename $1)
+target=$(readlink -f $1)
+pri=${2:-10}
+link="/etc/varnish/conf-enabled/${pri}-$base"
+if [ ! -e "$link" ]; then
+	ln -s ${target} ${link}
+fi
+

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+cleanit() {
+	echo > /etc/varnish/auto-includes.vcl
+	printit "# Auto-generated at $(date --iso-8601=minute)"
+}
+printit() {
+	cat >> /etc/varnish/auto-includes.vcl <<- _EOF_
+		$1
+	_EOF_
+}
+
+cleanit
+
+if [ "x$(echo /etc/varnish/conf-enabled/*.vcl)" = "x/etc/varnish/conf-enabled/*.vcl" ]; then
+	echo "no config"
+	printit "# No config enabled in /etc/varnish/conf-enabled"
+else
+    for a in $(ls -1 /etc/varnish/conf-enabled/*.vcl); do
+            echo "Including $a"
+            printit "include \"$a\";"
+    done
+fi
+if [ "x$(echo /etc/varnish/sites-enabled/*.vcl)" = "x/etc/varnish/sites-enabled/*.vcl" ]; then
+	echo "no backends?"
+	printit "# No backends enabled in /etc/varnish/sites-enabled"
+else
+    for a in $(ls -1 /etc/varnish/sites-enabled/*.vcl); do
+            echo "Including $a"
+            printit "include \"$a\";"
+    done
+fi
